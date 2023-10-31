@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Get locale from request"""
+from typing import Dict, Union
 from flask import Flask, render_template, request
 from flask_babel import Babel
+from flask import g
 
 
 class Config:
@@ -22,16 +24,7 @@ users = {
 }
 
 
-@babel.localeselector
-def get_locale() -> str:
-    """Get locale from request"""
-    locale = request.args.get('locale')
-    if locale in app.config['LANGUAGES']:
-        return locale
-    return request.accept_languages.best_match(app.config['LANGUAGES'])
-
-
-def get_user() -> dict:
+def get_user() -> Union[Dict, None]:
     """Returns a user dictionary or
     None if the ID cannot be found"""
     user_id = request.args.get('login_as')
@@ -46,10 +39,23 @@ def before_request():
     global on flask.g.user"""
     user = get_user()
     if user:
-        from flask import g
         g.user = user
     else:
         g.user = None
+
+
+@babel.localeselector
+def get_locale() -> str:
+    """Get locale from request"""
+    locale = request.args.get('locale', '')
+    if locale in app.config["LANGUAGES"]:
+        return locale
+    if g.user and g.user['locale'] in app.config["LANGUAGES"]:
+        return g.user['locale']
+    header_locale = request.headers.get('locale', '')
+    if header_locale in app.config["LANGUAGES"]:
+        return header_locale
+    return request.accept_languages.best_match(app.config["LANGUAGES"])
 
 
 @app.route('/')
