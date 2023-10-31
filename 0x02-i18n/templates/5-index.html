@@ -8,8 +8,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
   </head>
   <body>
-    <h1>{{_('home_header')}}</h1>
-
+    <h1>{{ _('home_header') }}</h1>
     { % if user % }
     <p>{{ _('home_welcome') }} {{ user.name }}</p>
     { % else % }
