@@ -3,13 +3,6 @@
 from flask import Flask, render_template, request
 from flask_babel import Babel
 
-users = {
-    1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
-    2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
-    3: {"name": "Spock", "locale": "kg", "timezone": "Vulcan"},
-    4: {"name": "Teletubby", "locale": None, "timezone": "Europe/London"},
-}
-
 
 class Config:
     """Config class for the application."""
@@ -21,6 +14,12 @@ class Config:
 app = Flask(__name__)
 app.config.from_object(Config)
 babel = Babel(app)
+users = {
+    1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
+    2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
+    3: {"name": "Spock", "locale": "kg", "timezone": "Vulcan"},
+    4: {"name": "Teletubby", "locale": None, "timezone": "Europe/London"},
+}
 
 
 @app.route('/')
@@ -41,10 +40,10 @@ def get_locale() -> str:
 def get_user() -> dict:
     """Returns a user dictionary or
     None if the ID cannot be found"""
-    try:
-        return users.get(int(request.args.get('login_as')))
-    except Exception:
-        return None
+    user_id = request.args.get('login_as')
+    if user_id and int(user_id) in users:
+        return users.get(int(user_id))
+    return None
 
 
 @app.before_request
@@ -55,6 +54,8 @@ def before_request():
     if user:
         from flask import g
         g.user = user
+    else:
+        g.user = None
 
 
 if __name__ == '__main__':
