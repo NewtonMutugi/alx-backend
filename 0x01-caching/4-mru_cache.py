@@ -1,32 +1,32 @@
 #!/usr/bin/env python3
 """ 4-mru_cache.py """
 from base_caching import BaseCaching
+from collections import OrderedDict
 
 
 class MRUCache(BaseCaching):
-    """MRUCache dictionary"""
+    """ MRUCache class """
 
     def __init__(self):
-        """Constructor"""
+        """ Constructor """
         super().__init__()
-        self.queue = []
+        self.queue = OrderedDict()
 
     def put(self, key, item):
-        """Add an item in the cache"""
+        """ Add an item in the cache """
         if key is not None and item is not None:
             if key in self.cache_data:
-                self.queue.remove(key)
+                self.queue.move_to_end(key, last=False)
             elif len(self.cache_data) >= self.MAX_ITEMS:
-                discard = self.queue.pop(0)
-                del self.cache_data[discard]
-                print("DISCARD: {}".format(discard))
-            self.queue.append(key)
+                discard = self.queue.popitem(last=True)
+                del self.cache_data[discard[0]]
+                print("DISCARD: {}".format(discard[0]))
+            self.queue[key] = item
             self.cache_data[key] = item
 
     def get(self, key):
-        """Get an item by key"""
+        """ Get an item by key """
         if key is None or key not in self.cache_data.keys():
             return None
-        self.queue.remove(key)
-        self.queue.append(key)
+        self.queue.move_to_end(key, last=False)
         return self.cache_data[key]
